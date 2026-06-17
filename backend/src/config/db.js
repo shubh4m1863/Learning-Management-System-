@@ -12,11 +12,12 @@ const basePrisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
 
-// Extend prisma client with read replicas ONLY if a replica URL is provided
-const prisma = process.env.DATABASE_URL_REPLICA 
+const replicaUrl = (process.env.DATABASE_URL_REPLICA || '').trim();
+
+const prisma = replicaUrl
   ? basePrisma.$extends(
       readReplicas({
-        url: process.env.DATABASE_URL_REPLICA,
+        url: replicaUrl,
       })
     )
   : basePrisma;

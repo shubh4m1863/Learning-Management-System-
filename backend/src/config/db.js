@@ -1,33 +1,19 @@
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
-const { readReplicas } = require('@prisma/extension-read-replicas');
 const logger = require('../utils/logger');
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 
-// Base prisma client
-const basePrisma = new PrismaClient({ 
+const prisma = new PrismaClient({ 
   adapter,
   log: ['query', 'info', 'warn', 'error'],
 });
 
-const replicaUrl = (process.env.DATABASE_URL_REPLICA || '').trim();
-
-const prisma = replicaUrl
-  ? basePrisma.$extends(
-      readReplicas({
-        url: replicaUrl,
-      })
-    )
-  : basePrisma;
-
 const connectDB = async () => {
   try {
-    await basePrisma.$connect();
-    logger.info('PostgreSQL Primary Connected via Prisma');
-    // Read replicas are connected on-demand by the extension, but we log readiness
-    logger.info(`Database Read-Replica Ready: ${!!process.env.DATABASE_URL_REPLICA}`);
+    await prisma.$connect();
+    logger.info('PostgreSQL Connected via Prisma');
   } catch (error) {
     logger.error({ err: error }, 'Database connection error');
     process.exit(1);

@@ -6,7 +6,8 @@ const logger = require('../utils/logger');
 const redis = new Redis(process.env.REDIS_URL || {
   host: process.env.REDIS_HOST || '127.0.0.1',
   port: process.env.REDIS_PORT || 6379,
-  // password: process.env.REDIS_PASSWORD,
+  password: process.env.REDIS_PASSWORD,
+  tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
   enableOfflineQueue: false, // Fail fast if Redis is down instead of hanging
   maxRetriesPerRequest: null // Required by bullmq
 });

@@ -1,13 +1,7 @@
 const { Worker } = require('bullmq');
 const logger = require('../utils/logger');
 
-const connectionOptions = {
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: process.env.REDIS_PORT || 6379,
-  maxRetriesPerRequest: null,
-  enableOfflineQueue: false
-};
-
+const redisConfig = require('../services/redis.service');
 // This simulates an email sending service (e.g. Nodemailer/SendGrid)
 const mockSendEmail = async ({ to, subject, body }) => {
   return new Promise((resolve) => {
@@ -25,7 +19,7 @@ const emailWorker = new Worker('email-queue', async (job) => {
   await mockSendEmail(job.data);
   
   return { delivered: true };
-}, { connection: connectionOptions });
+}, { connection: redisConfig });
 
 emailWorker.on('completed', (job) => {
   logger.info(`[EmailWorker] Job ${job.id} completed successfully.`);
